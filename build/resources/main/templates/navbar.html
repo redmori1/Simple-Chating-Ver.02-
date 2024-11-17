@@ -1,0 +1,31 @@
+<nav th:fragment="navbarFragment" class="navbar navbar-expand navbar-light bg-light border-bottom" id="navbar">
+	<div class="container-fluid">
+		<a class="navbar-brand" href="#">심플한 채팅</a>
+		<div class="navbar" id="navbarSupportedContent">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="#">Home</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">Abort</a>
+				</li>
+				<li class="nav-item">
+					<p class="nav-link" id="toggle-button">다크 모드</p>
+				</li>
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+						채팅방 관련 더보기
+					</a>
+					<ul class="dropdown-menu" id="dropdown">
+						<li><a class="dropdown-item" href="/">채팅방 생성</a></li>
+						<li><a class="dropdown-item" href="/Enter">채팅방 접속</a></li>
+						<li><a class="dropdown-item" href="/Delete">채팅방 삭제</a></li>
+					</ul>
+				</li>
+				<li class="nav-item">
+					<p class="nav-link" th:text="${mode}"></p>
+				</li>
+			</ul>
+		</div>
+	</div>
+</nav>

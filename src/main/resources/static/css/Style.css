@@ -1,0 +1,53 @@
+body,html{
+    font-family: "Jua", sans-serif;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    padding-top: 45px;
+    flex-direction: column;
+}
+.main-box{
+    margin: 10px;
+    width: 600px;
+    height: 300px;
+    text-align: center;
+    border: 0.5px solid black;
+    align-items: center;
+}
+.main-box2{
+    margin: 10px;
+    width: 600px;
+    height: 450px;
+    text-align: center;
+    border: 0.5px solid black;
+    align-items: center;
+}
+.main-box3{
+    margin: 10px;
+    width: 600px;
+    height: 570px;
+    text-align: center;
+    border: 0.5px solid black;
+    align-items: center;
+}
+.title{
+    width: 400px;
+    height: 110px;
+    text-align: center;
+    border: 0.5px solid black;
+    border-radius: 5px;
+    background-color: rgba(127, 255, 212, 0.5);
+}
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1030;
+}
+.navbar-nav{
+    margin-left: 110px;
+}
+.chatmode{
+    text-align: center;
+}

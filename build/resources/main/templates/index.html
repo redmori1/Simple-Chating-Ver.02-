@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout">
+<body id="element">
+<div class="title" layout:fragment="content" id="title">
+    <div class="title-text" style="margin-top : 20px;"><h3>Simple한 채팅방<br>아래 정보를 적어주세요.</h3></div>
+</div>
+<div class="chatmode" layout:fragment="content-mode">
+    <ul class="nav nav-tabs" style="margin-top: 10px; justify-content: center">
+        <li class="nav-item">
+            <a class="nav-link active" href="/" th:if="${mode == 'Creating'}">채팅방 생성</a>
+            <a class="nav-link" href="/" th:unless="${mode == 'Creating'}">채팅방 생성</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/Enter" th:unless="${mode == 'Entering'}">채팅방 접속</a>
+            <a class="nav-link active" href="/Enter" th:if="${mode == 'Entering'}">채팅방 접속</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/Delete" th:unless="${mode == 'Deleting'}">채팅방 삭제</a>
+            <a class="nav-link active" href="/Delete" th:if="${mode == 'Deleting'}">채팅방 삭제</a>
+        </li>
+    </ul>
+</div>
+<div th:replace="~{form_errors :: formErrorsFragment}"></div>
+<div style="border: 0.5px solid black;" th:if="${createSucess}" th:text="${createSucess}"></div>
+<div class="main-box2" layout:fragment="content-create" id="main-box" th:if="${mode == 'Creating'}">
+    <form th:object="${chatRoomEnterForm}" th:action="@{/createRoom}" name="chatroom" method="post" style="margin: 20px;" onsubmit="return submitcheck();">
+        <label for="Chatname" class="form-label" style="text-align: left;">채팅방 ID</label>
+        <input type="text" th:field="*{Chatname}" id="Chatname" class="form-control" required placeholder="채팅방 이름">
+        <div class="form-text">채팅방 이름을 입력해주세요. 비속어 사용 적발시 채팅방이 삭제됩니다.</div>
+        <br>
+        <label for="ChatPassword" class="form-label" style="text-align: left;">채팅방 PW</label>
+        <input type="password" th:field="*{ChatPassword}" id="ChatPassword" class="form-control" required placeholder="채팅방 비밀번호">
+        <div class="form-text">채팅방 비밀번호를 입력해주세요.</div>
+        <br>
+        <label for="Nickname" class="form-label" style="text-align: left;">닉네임</label>
+        <input type="text" th:field="*{Nickname}" id="Nickname" class="form-control" placeholder="채팅방 방장의 닉네임을 입력해주세요." required>
+        <div class="form-text">방장의 닉네임을 입력해주세요. 채팅방 삭제시 입력하신 닉네임이 일치해야 삭제가 가능합니다.</div>
+        <br>
+        <button type="submit" class="btn btn-primary">채팅방 생성</button>
+    </form>
+</div>
+<div class="main-box2" layout:fragment="content-Enter" id="main-box2" th:if="${mode == 'Entering'}">
+    <form th:object="${chatRoomEnterForm}" th:action="@{/joinRoom}" name="chatroom" method="post" style="margin: 20px;" onsubmit="return submitcheck();">
+        <label for="Chatname" class="form-label" style="text-align: left;">채팅방 ID</label>
+        <input type="text" th:field="*{Chatname}" id="Chatname" class="form-control" placeholder="채팅방 이름" required>
+        <div class="form-text">채팅방 이름을 입력해주세요. 비속어 사용 적발시 채팅방이 삭제됩니다.</div>
+        <br>
+        <label for="ChatPassword" class="form-label" style="text-align: left;">채팅방 PW</label>
+        <input type="password" th:field="*{ChatPassword}" id="ChatPassword" class="form-control" placeholder="채팅방 비밀번호" required>
+        <div class="form-text">채팅방 비밀번호를 입력해주세요.</div>
+        <br>
+        <label for="Nickname" class="form-label" style="text-align: left;">닉네임</label>
+        <input type="text" th:field="*{Nickname}" id="Nickname" class="form-control" placeholder="닉네임" required>
+        <div class="form-text">사용할 닉네임을 입력해주세요.</div>
+        <br>
+        <button type="submit" class="btn btn-primary">채팅방 접속</button>
+    </form>
+</div>
+<div class="main-box3" layout:fragment="content-Delete" id="main-box2" th:if="${mode == 'Deleting'}">
+    <form th:object="${chatRoomDeleteForm}" th:action="@{/DeleteChatRoom}" name="chatroom" method="post" style="margin: 20px;" onsubmit="return submitcheck();">
+        <label for="Chatname" class="form-label" style="text-align: left;">채팅방 ID</label>
+        <input type="text" th:field="*{Chatname}" id="Chatname" class="form-control" placeholder="채팅방 이름" required>
+        <div class="form-text">채팅방 이름을 입력해주세요.</div>
+        <br>
+        <label for="ChatPassword" class="form-label" style="text-align: left;">채팅방 PW</label>
+        <input type="password" th:field="*{ChatPassword}" id="ChatPassword" class="form-control" placeholder="채팅방 비밀번호" required>
+        <div class="form-text">채팅방 비밀번호를 입력해주세요.</div>
+        <br>
+        <label for="Nickname" class="form-label" style="text-align: left;">닉네임</label>
+        <input type="text" th:field="*{Nickname}" id="Nickname" class="form-control" placeholder="닉네임" required>
+        <div class="form-text">채팅방 방장의 닉네임을 입력해주세요.</div>
+        <br>
+        <label for="ipaddress" class="form-label" style="text-align: left;">닉네임</label>
+        <input type="text" th:field="*{IP}" id="ipaddress" class="form-control" placeholder="채팅방 생성 당시의 IP주소 6자리(예:126.12)"
+               pattern="^[0-9.]{1,6}$" title="최대 6자리만 입력가능합니다. 형식 (132.26)" maxlength="6" required>
+        <div class="form-text">채팅방 생성 당시 IP의 6자리를 .을 포함하여 입력해주세요.</div>
+        <br>
+        <button type="submit" class="btn btn-danger">채팅방 삭제</button>
+    </form>
+</div>
+</body>
+</html>
