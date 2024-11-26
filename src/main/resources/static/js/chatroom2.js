@@ -6,7 +6,7 @@ if(NewChat >= 1){
     NewChatCount.hidden = false;
     NewChatCount.text = NewChat;
 }
-function connect() {
+function connect(options) {
     var socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
@@ -17,27 +17,92 @@ function connect() {
         });
         stompClient.subscribe('/topic/' + roomId + '/activeUsers', function(message) {
             var users = JSON.parse(message.body);
-            document.getElementById("chat_status2").innerText = "채팅방 연결됨";
+            if (users > 2) {
+                document.getElementById("chat_status2").innerText = "채팅방 연결됨";
+            }
             updateActiveUsers(users);
         });
-        RequestUserList(roomId);
+        stompClient.send("/app/chat.user/" + roomId);
     });
 }
 
 function sendMessage() {
+    if(stompClient.connected === false){
+        alert("현재 채팅방 접속이 해제된 상태입니다. 채팅방 재접속을 해주세요");
+        return;
+    }
     var message = {
         'sender': nickname,
         'content': document.getElementById('content').value,
         'chatRoom': { 'id': roomId }
     };
+    if(message.content.length == 0){
+        alert("전송할 메세지가 없습니다. 메세지를 입력후 전송 버튼을 눌러주세요");
+        return;
+    }
+    const urlPattern = /https?:\/\/[^\s]+/;
+    if(urlPattern.test(message.content)){
+        message.content = `website:${message.content}`;
+    }
+    console.log(message.content);
     stompClient.send("/app/chat.sendMessage/" + roomId, {}, JSON.stringify(message));
     showSendingMessage(message);
 }
 
 
-function showSendingMessage(message) {
-    var sending = document.getElementById('sending');
-    var div = document.createElement('div');
+async function showSendingMessage(message) {
+    let sending = document.getElementById('sending');
+    if(message.content.includes("website:")){
+        let res;
+        try{
+            res = await fetchLinkPreview(message.content, {mode:'no-cors'});
+        }catch (error){
+            alert("링크 유효성 확인이 실패했습니다(외부 서버 지원 안함)");
+            const div = document.createElement('div');
+            div.className = 'chat-message-right pb-4';
+            div.innerHTML = `
+                <div>
+                    <div class="text-muted small text-nowrap mt-2">${new Date().toLocaleString()}</div>
+                </div>
+                <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+                    <div class="font-weight-bold mb-1" id="nickname">${message.sender}</div>
+                    <a href="${message.content.substring(8,message.content.length)}">${message.content.substring(8, message.content.length)}</a>
+                </div>
+            `;
+            sending.appendChild(div);
+            return;
+        }
+        if(!res || res.valid === false){
+            alert("해당 링크에 대한 정보를 가져오는데 실패하였습니다.");
+            const div = document.createElement('div');
+            div.className = 'chat-message-right pb-4';
+            div.innerHTML = `
+                <div>
+                    <div class="text-muted small text-nowrap mt-2">${new Date().toLocaleString()}</div>
+                </div>
+                <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+                    <div class="font-weight-bold mb-1" id="nickname">${message.sender}</div>
+                    <a href="${message.content.substring(8,message.content.length)}">${message.content.substring(8, message.content.length)}</a>
+                </div>
+            `;
+            sending.appendChild(div);
+            return;
+        }
+        const div = document.createElement('div');
+        div.className = 'chat-message-right pb-4';
+        div.innerHTML = `
+        <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+            <div>
+                <img src="${res.thumbnail}" style="height: 150px; weight:200px;">
+                <hr>
+                <p id="link-content">${res.title}</p>
+                <div class="text-muted small text-nowrap mt-2">${message.timestamp}</div>
+            </div>
+        </div>`
+        sending.appendChild(div);
+        return;
+    }
+    const div = document.createElement('div');
     div.className = 'chat-message-right pb-4';
     div.innerHTML = `
                 <div>
@@ -50,7 +115,7 @@ function showSendingMessage(message) {
             `;
     sending.appendChild(div);
     if (message.fileName) {
-        var link = document.createElement('a');
+        const link = document.createElement('a');
         link.href = '/uploads/' + message.fileName;
         link.textContent = message.fileName;
         sending.appendChild(link);
@@ -58,11 +123,27 @@ function showSendingMessage(message) {
 }
 
 function showReceivedMessage(message) {
-    var response = document.getElementById('response');
+    const response = document.getElementById('response');
     if (message.sender === nickname) {
         return;
     }
-    var div = document.createElement('div');
+    if(message.content.includes("websites:")){
+        const div = document.createElement('div');
+        div.className = 'chat-message-left pb-4';
+        div.innerHTML = `
+        <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+            <div>
+                <img src="" style="height: 150px; weight:200px;">
+                <hr>
+                <p id="link-content"></p>
+                <div class="text-muted small text-nowrap mt-2">${message.timestamp}</div>
+            </div>
+        </div>`
+        response.appendChild(div);
+        NewChat++;
+        return;
+    }
+    const div = document.createElement('div');
     div.className = 'chat-message-left pb-4';
     div.innerHTML = `
         <div>
@@ -87,17 +168,17 @@ function showReceivedMessage(message) {
 function joinRoom() {
     // var roomIdInput = document.getElementById('roomId').value;
     // var password = document.getElementById('password').value;
-    var xhr = new XMLHttpRequest();
+    const xhr = new XMLHttpRequest();
     xhr.open("POST", "/joinChatroom", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onload = function () {
         if (xhr.status === 200 && xhr.responseText === "success") {
             connect();
-            var xhrMessages = new XMLHttpRequest();
+            const xhrMessages = new XMLHttpRequest();
             xhrMessages.open("GET", "/getPreviousMessages?roomId=" + roomId, true);
             xhrMessages.onload = function () {
                 if (xhrMessages.status === 200) {
-                    var responseData = JSON.parse(xhrMessages.responseText);
+                    const responseData = JSON.parse(xhrMessages.responseText);
                     if (Array.isArray(responseData)) {
                         responseData.forEach(function (message) {
                             if (message.sender === nickname) {
@@ -150,26 +231,40 @@ function updateActiveUsers(users) {
     });
 }
 
-function leaveChannel(RoomName, username) {
-    stompClient.send("/app/chat.leave/" + RoomName, {}, username);
-}
-
 function disconnect() {
     if (stompClient !== null) {
+        stompClient.send("/topic/chat.leave/" + roomId + '/' + nickname);
         stompClient.disconnect();
-        leaveChannel(roomId, nickname);
     }
     document.getElementById("chat_status2").innerText = "채팅방을 나가셨습니다. 메인화면으로 이동합니다.";
+    document.getElementById("send_message").disable = true;
+    document.getElementById("send_message").classList.add("disabled");
     console.log('접속 해제됨');
     alert("정상적으로 접속 해제되었습니다. 메인 페이지로 이동합니다");
-}
-function RequestUserList(RoomName){
-    stompClient.send("/ws/chat.user/" + roomId, {}, {} );
 }
 function NewChatCheck(){
     if(NewChat !== 0){
         var NewChatCount = document.getElementById("New_Cheating");
         NewChatCount.innerText = 0;
         NewChatCount.hidden = true;
+    }
+}
+
+async function fetchLinkPreview(url){
+    try{
+        url = url.substring(8,url.length);
+        const response = await fetch(url, { method: 'HEAD' });
+        if (!response.ok) {
+            return { valid: false, message: '링크가 유효하지 않음' };
+        }
+        const htmlResponse = await fetch(url);
+        const html = await htmlResponse.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const ogTitle = doc.querySelector('meta[property="og:title"]')?.content || '타이틀 없음';
+        const ogImage = doc.querySelector('meta[property="og:image"]')?.content || `https://cdn.pixabay.com/photo/2024/11/02/17/29/city-9169729_1280.jpg`;
+        return { valid: true, title: ogTitle, thumbnail: ogImage };
+    } catch (error) {
+        return { valid: false, message: error.message };
     }
 }

@@ -180,16 +180,17 @@ public class ChatController {
         return ip;
     }
 
-    @MessageMapping("/chat.leave/{RoomName}")
+    @MessageMapping("/chat.leave/{RoomName}/{username}")
     public void leave(@DestinationVariable String RoomName,
-                      @Payload String username) {
+                      @DestinationVariable String username) {
         chatRoomEventListener.handleUserDisconnect(RoomName, username);
     }
 
     @MessageMapping("/chat.user/{RoomName}")
     public void GetChatRoomUserList(@DestinationVariable String RoomName){
-        List<String> UserList = chatRoomEventListener.getUsersInChannel(RoomName);
-        messagingTemplate.convertAndSend("/topic/" + RoomName + "/activeUsers", UserList);
+        List<String> usersInChannel = chatRoomEventListener.getUsersInChannel(RoomName);
+        System.out.println("GetChatRoomUserList: " + usersInChannel);
+        chatRoomEventListener.broadcastUserList(RoomName, usersInChannel);
     }
 }
 
