@@ -63,14 +63,13 @@
         var roomId = /*[[${Chatname}]]*/ || 'null';
         var password = /*[[${ChatPassword}]]*/ || 'null';
         var nickname = /*[[${Nickname}]]*/ || 'null';
-        console.log(roomId + password + nickname);
-        if(roomId === 'null'){
+        if(roomId === null){
             alert("채팅방 ID를 정상적으로 수신하지 못했습니다. 메인페이지로 이동합니다.");
             // mainpage();
-        }else if(password === 'null'){
+        }else if(password === null){
             alert("채팅방 PW를 정상적으로 수신하지 못했습니다. 메인페이지로 이동합니다.");
             // mainpage();
-        }else if(nickname === 'null'){
+        }else if(nickname === null){
             alert("닉네임을 정상적으로 수신하지 못했습니다. 메인페이지로 이동합니다.");
             // mainpage();
         }
@@ -137,7 +136,7 @@
                                     <li class="nav-item dropdown">
                                         <button class="nav-link dropdown-toggle btn btn-light border btn-lg px-3" role="button" data-toggle="dropdown" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal feather-lg"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></button>
                                         <ul class="dropdown-menu text-center" id="dropdown">
-                                            <li><button class="btn btn-primary" id="chat_reconnect" disabled style="margin-bottom: 10px;">채팅방 재접속</button></li>
+                                            <li><button class="btn btn-primary" id="chat_reconnect" disabled style="margin-bottom: 10px;" onclick="reconnect();">채팅방 재접속</button></li>
                                             <li><button class="btn btn-primary" onclick="disconnect();">채팅방 나가기</button> </li>
                                         </ul>
                                     </li>

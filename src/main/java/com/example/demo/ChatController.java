@@ -49,7 +49,7 @@ public class ChatController {
     public void sendMessage(@DestinationVariable("roomName") String name, @Payload ChatMessage chatMessage) {
         ChatRoom chatRoom = chatService.findChatRoomByName(name);
         chatMessage.setChatRoom(chatRoom);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd a HH:mm:ss");
         String formatedDate = LocalDateTime.now().format(formatter);
         chatMessage.setTimestamp(formatedDate);
         chatMessage.setChatRoom_name(name);
@@ -57,14 +57,10 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/public/" + name, chatMessage); // 메시지를 클라이언트로 전달
     }
 
-    @PostMapping("/chat.addUser")
-    public void addUser(ChatMessage chatMessage) {
-        chatMessage.setContent("User joined");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formatedDate = LocalDateTime.now().format(formatter);
-        chatMessage.setTimestamp(formatedDate);
-        chatService.saveMessage(chatMessage);
-        messagingTemplate.convertAndSend("/topic/public/" + chatMessage.getChatRoom_name(), chatMessage); // 메시지를 클라이언트로 전달
+    @MessageMapping("/chat.reconnect/{RoomName}/{nickname}")
+    public void addUser(@DestinationVariable String RoomName, @DestinationVariable String nickname) {
+        chatRoomEventListener.addUserToChannel(RoomName, nickname);
+        GetChatRoomUserList(RoomName);
     }
 
     @PostMapping("/uploadFile")
