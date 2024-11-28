@@ -24,6 +24,7 @@ function connect(options) {
         });
         stompClient.send("/app/chat.user/" + roomId);
     });
+    document.getElementById("chat_name").innerText = roomId + "채팅방";
 }
 
 function sendMessage() {
@@ -36,7 +37,7 @@ function sendMessage() {
         'content': document.getElementById('content').value,
         'chatRoom': { 'id': roomId }
     };
-    if(message.content.length == 0){
+    if(message.content.length == null){
         alert("전송할 메세지가 없습니다. 메세지를 입력후 전송 버튼을 눌러주세요");
         return;
     }
@@ -89,7 +90,7 @@ async function showSendingMessage(message) {
         div.innerHTML = `
         <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
             <div>
-                <img src="${res.thumbnail}" style="height: 150px; weight:200px;">
+                <img src="${res.thumbnail}" style="height: 150px; weight:200px;" alt="이미지 로딩 실패">
                 <hr>
                 <p id="link-content">${res.title}</p>
                 <div class="text-muted small text-nowrap mt-2">${message.timestamp || new Date().toLocaleString()}</div>
@@ -130,7 +131,7 @@ function showReceivedMessage(message) {
         div.innerHTML = `
         <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
             <div>
-                <img src="" style="height: 150px; weight:200px;">
+                <img src="" style="height: 150px; weight:200px;" alt="이미지 로딩 실패">
                 <hr>
                 <p id="link-content"></p>
                 <div class="text-muted small text-nowrap mt-2">${message.timestamp}</div>
@@ -233,6 +234,10 @@ function disconnect() {
     if (stompClient !== null) {
         stompClient.send("/topic/chat.leave/" + roomId + '/' + nickname);
         stompClient.disconnect();
+    }
+    if(stompClient == null){
+        alert("이미 접속이 해제됬습니다. 채팅방 재접속을 해주시거나 메인 페이지로 이동해주세요");
+        return;
     }
     document.getElementById("chat_status2").innerText = "채팅방을 나가셨습니다. 메인화면으로 이동합니다.";
     document.getElementById("send_message").disable = true;
