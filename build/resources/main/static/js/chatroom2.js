@@ -40,10 +40,6 @@ function sendMessage() {
         alert("전송할 메세지가 없습니다. 메세지를 입력후 전송 버튼을 눌러주세요");
         return;
     }
-    const urlPattern = /https?:\/\/[^\s]+/;
-    if(urlPattern.test(message.content)){
-        message.content = `website:${message.content}`;
-    }
     console.log(message.content);
     stompClient.send("/app/chat.sendMessage/" + roomId, {}, JSON.stringify(message));
     showSendingMessage(message);
@@ -51,8 +47,8 @@ function sendMessage() {
 
 
 async function showSendingMessage(message) {
-    let sending = document.getElementById('sending');
-    if(message.content.includes("website:")){
+    let sending = document.getElementById("chat-message");
+    if(message.content.includes("http://") || message.content.includes("https://")){
         let res;
         try{
             res = await fetchLinkPreview(message.content, {mode:'no-cors'});
@@ -62,11 +58,11 @@ async function showSendingMessage(message) {
             div.className = 'chat-message-right pb-4';
             div.innerHTML = `
                 <div>
-                    <div class="text-muted small text-nowrap mt-2">${new Date().toLocaleString()}</div>
+                    <div class="text-muted small text-nowrap mt-2">${message.timestamp || new Date().toLocaleString()}</div>
                 </div>
                 <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
                     <div class="font-weight-bold mb-1" id="nickname">${message.sender}</div>
-                    <a href="${message.content.substring(8,message.content.length)}">${message.content.substring(8, message.content.length)}</a>
+                    <a href="${message.content}">${message.content}</a>
                 </div>
             `;
             sending.appendChild(div);
@@ -78,11 +74,11 @@ async function showSendingMessage(message) {
             div.className = 'chat-message-right pb-4';
             div.innerHTML = `
                 <div>
-                    <div class="text-muted small text-nowrap mt-2">${new Date().toLocaleString()}</div>
+                    <div class="text-muted small text-nowrap mt-2">${message.timestamp || new Date().toLocaleString()}</div>
                 </div>
                 <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
                     <div class="font-weight-bold mb-1" id="nickname">${message.sender}</div>
-                    <a href="${message.content.substring(8,message.content.length)}">${message.content.substring(8, message.content.length)}</a>
+                    <a href="${message.content}">${message.content}</a>
                 </div>
             `;
             sending.appendChild(div);
@@ -96,7 +92,7 @@ async function showSendingMessage(message) {
                 <img src="${res.thumbnail}" style="height: 150px; weight:200px;">
                 <hr>
                 <p id="link-content">${res.title}</p>
-                <div class="text-muted small text-nowrap mt-2">${message.timestamp}</div>
+                <div class="text-muted small text-nowrap mt-2">${message.timestamp || new Date().toLocaleString()}</div>
             </div>
         </div>`
         sending.appendChild(div);
@@ -106,7 +102,7 @@ async function showSendingMessage(message) {
     div.className = 'chat-message-right pb-4';
     div.innerHTML = `
                 <div>
-                    <div class="text-muted small text-nowrap mt-2">${new Date().toLocaleString()}</div>
+                    <div class="text-muted small text-nowrap mt-2">${message.timestamp || new Date().toLocaleString()}</div>
                 </div>
                 <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
                     <div class="font-weight-bold mb-1" id="nickname">${message.sender}</div>
@@ -122,12 +118,13 @@ async function showSendingMessage(message) {
     }
 }
 
+
 function showReceivedMessage(message) {
-    const response = document.getElementById('response');
+    const response = document.getElementById("chat-message");
     if (message.sender === nickname) {
         return;
     }
-    if(message.content.includes("websites:")){
+    if(message.content.includes("http://") || message.content.includes("https://")){
         const div = document.createElement('div');
         div.className = 'chat-message-left pb-4';
         div.innerHTML = `
@@ -175,11 +172,12 @@ function joinRoom() {
         if (xhr.status === 200 && xhr.responseText === "success") {
             connect();
             const xhrMessages = new XMLHttpRequest();
-            xhrMessages.open("GET", "/getPreviousMessages?roomId=" + roomId, true);
+            xhrMessages.open("GET", "/getPreviousMessages/" + roomId, true);
             xhrMessages.onload = function () {
                 if (xhrMessages.status === 200) {
                     const responseData = JSON.parse(xhrMessages.responseText);
                     if (Array.isArray(responseData)) {
+                        responseData.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
                         responseData.forEach(function (message) {
                             if (message.sender === nickname) {
                                 showSendingMessage(message);
@@ -252,7 +250,6 @@ function NewChatCheck(){
 
 async function fetchLinkPreview(url){
     try{
-        url = url.substring(8,url.length);
         const response = await fetch(url, { method: 'HEAD' });
         if (!response.ok) {
             return { valid: false, message: '링크가 유효하지 않음' };

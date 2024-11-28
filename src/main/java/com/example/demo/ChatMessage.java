@@ -1,11 +1,8 @@
 package com.example.demo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 @Entity
 @Getter
@@ -22,5 +19,6 @@ public class ChatMessage {
 
    @ManyToOne
    @JoinColumn(name = "name")
+   @JsonIgnore
    private ChatRoom chatRoom; // ChatRoom DB 참조
 }

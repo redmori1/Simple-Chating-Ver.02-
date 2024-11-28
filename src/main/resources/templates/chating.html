@@ -64,13 +64,13 @@
         var password = /*[[${ChatPassword}]]*/ || 'null';
         var nickname = /*[[${Nickname}]]*/ || 'null';
         console.log(roomId + password + nickname);
-        if(roomId == 'null'){
+        if(roomId === 'null'){
             alert("채팅방 ID를 정상적으로 수신하지 못했습니다. 메인페이지로 이동합니다.");
             // mainpage();
-        }else if(password == 'null'){
+        }else if(password === 'null'){
             alert("채팅방 PW를 정상적으로 수신하지 못했습니다. 메인페이지로 이동합니다.");
             // mainpage();
-        }else if(nickname == 'null'){
+        }else if(nickname === 'null'){
             alert("닉네임을 정상적으로 수신하지 못했습니다. 메인페이지로 이동합니다.");
             // mainpage();
         }
@@ -146,9 +146,7 @@
                         </div>
                     </div>
                     <div class="position-relative">
-                        <div class="chat-messages p-4">
-                            <div id="sending"></div>
-                            <div id="response"></div>
+                        <div class="chat-messages p-4" id="chat-message">
                         </div>
                     </div>
                     <div class="flex-grow-0 py-3 px-4 border-top">

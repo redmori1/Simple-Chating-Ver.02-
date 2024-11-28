@@ -41,6 +41,7 @@ dependencies {
 	implementation 'com.oracle.database.security:osdt_cert'
 	implementation 'com.oracle.database.security:oraclepki'
 	implementation 'com.oracle.database.security:osdt_core'
+	implementation 'com.github.jsqlparser:jsqlparser:4.6'
 }
 
 tasks.named('test') {

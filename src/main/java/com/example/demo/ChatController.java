@@ -52,6 +52,7 @@ public class ChatController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formatedDate = LocalDateTime.now().format(formatter);
         chatMessage.setTimestamp(formatedDate);
+        chatMessage.setChatRoom_name(name);
         chatService.saveMessage(chatMessage);
         messagingTemplate.convertAndSend("/topic/public/" + name, chatMessage); // 메시지를 클라이언트로 전달
     }
@@ -160,9 +161,9 @@ public class ChatController {
         return "index";
     }
 
-    @GetMapping("/getPreviousMessages")
-    public ResponseEntity<List<ChatMessage>> getPreviousMessages(String name) {
-        List<ChatMessage> messages = chatService.getAllMessagesByRoomName(name);
+    @GetMapping("/getPreviousMessages/{RoomName}")
+    public ResponseEntity<List<ChatMessage>> getPreviousMessages(@PathVariable String RoomName) {
+        List<ChatMessage> messages = chatService.getAllMessagesByRoomName(RoomName);
         return ResponseEntity.ok(messages);
     }
 

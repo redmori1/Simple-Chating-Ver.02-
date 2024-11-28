@@ -70,7 +70,7 @@
         <input type="text" th:field="*{Nickname}" id="Nickname" class="form-control" placeholder="닉네임" required>
         <div class="form-text">채팅방 방장의 닉네임을 입력해주세요.</div>
         <br>
-        <label for="ipaddress" class="form-label" style="text-align: left;">닉네임</label>
+        <label for="ipaddress" class="form-label" style="text-align: left;">방장의 IP 6자리</label>
         <input type="text" th:field="*{IP}" id="ipaddress" class="form-control" placeholder="채팅방 생성 당시의 IP주소 6자리(예:126.12)"
                pattern="^[0-9.]{1,6}$" title="최대 6자리만 입력가능합니다. 형식 (132.26)" maxlength="6" required>
         <div class="form-text">채팅방 생성 당시 IP의 6자리를 .을 포함하여 입력해주세요.</div>
